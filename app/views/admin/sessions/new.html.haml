@@ -1,0 +1,38 @@
+%div.min-h-screen.flex.items-center.justify-center.bg-light-beige.py-12.px-4.sm:px-6.lg:px-8
+  .max-w-md.w-full.space-y-8
+    %div
+      .mx-auto.h-12.w-12.flex.items-center.justify-center.rounded-full.bg-amber-100
+        %svg.h-6.w-6.text-amber-600{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+          %path{:d => "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+      %h2.mt-6.text-center.text-3xl.font-extrabold.text-brown-black
+        Admin Sign In
+      %p.mt-2.text-center.text-sm.text-gray-600
+        Access the Das Club admin dashboard
+
+    = form_for(resource, as: resource_name, url: session_path(resource_name), method: :post, class: "mt-8 space-y-6") do |f|
+      - if alert
+        .bg-red-100.border.border-red-400.text-red-700.px-4.py-3.rounded.mb-4
+          = alert
+      
+      .rounded-md.shadow-sm.-space-y-px
+        %div
+          = f.label :email, class: "sr-only"
+          = f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Admin email address", class: "appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm"
+        
+        %div
+          = f.label :password, class: "sr-only"
+          = f.password_field :password, autocomplete: "current-password", placeholder: "Password", class: "appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm"
+
+      .flex.items-center.justify-between
+        .flex.items-center
+          = f.check_box :remember_me, class: "h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+          = f.label :remember_me, "Remember me", class: "ml-2 block text-sm text-gray-900"
+
+        .text-sm
+          = link_to "Forgot your password?", new_password_path(resource_name), class: "font-medium text-amber-600 hover:text-amber-500"
+
+      %div
+        = f.submit "Sign in", class: "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+
+      .text-center
+        = link_to "Back to Site", root_path, class: "text-sm text-gray-600 hover:text-gray-500"

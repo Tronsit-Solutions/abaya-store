@@ -1,0 +1,64 @@
+.max-w-7xl.mx-auto
+  / Header
+  .flex.justify-between.items-center.mb-8
+    %div
+      %h1.text-3xl.font-bold.text-brown-black Customer Details
+      = link_to "← Back to Customers", admin_customers_path, class: "text-amber-600 hover:text-amber-700 font-medium mt-2 inline-block"
+
+  .grid.grid-cols-1.lg:grid-cols-3.gap-8
+    / Main Content
+    .lg:col-span-2
+      / Customer Orders
+      .bg-white.rounded-lg.shadow-lg.p-6.mb-6
+        %h2.text-xl.font-semibold.text-brown-black.mb-4 Order History
+        - if @orders.any?
+          .divide-y.divide-gray-200
+            - @orders.each do |order|
+              .py-4
+                .flex.justify-between.items-start
+                  %div
+                    = link_to "Order ##{order.id}", admin_order_path(order), class: "text-lg font-semibold text-amber-600 hover:text-amber-700"
+                    %p.text-sm.text-gray-600= order.created_at.strftime("%B %d, %Y at %I:%M %p")
+                    %p.text-sm.text-gray-600
+                      %span.inline-block.px-2.py-1.rounded.text-xs.font-medium{class: order_status_class(order.status)}= order.status.capitalize
+                  %div.text-right
+                    %p.text-lg.font-bold.text-green-600 $#{order.total}
+                    %p.text-sm.text-gray-600 #{order.order_items.sum(:quantity)} items
+        - else
+          %p.text-gray-500.text-center.py-8 No orders yet
+
+    / Sidebar
+    .space-y-6
+      / Customer Info
+      .bg-white.rounded-lg.shadow-lg.p-6
+        %h2.text-xl.font-semibold.text-brown-black.mb-4 Customer Information
+        %div.space-y-4
+          %div
+            %p.text-sm.font-medium.text-gray-600 Email
+            %p.text-lg.text-brown-black.font-semibold= @customer.email
+          %div
+            %p.text-sm.font-medium.text-gray-600 Member Since
+            %p.text-brown-black= @customer.created_at.strftime("%B %d, %Y")
+          %div
+            %p.text-sm.font-medium.text-gray-600 Last Order
+            - if @customer.orders.any?
+              %p.text-brown-black= @customer.orders.order(created_at: :desc).first.created_at.strftime("%B %d, %Y")
+            - else
+              %p.text-gray-400 No orders yet
+
+      / Statistics
+      .bg-white.rounded-lg.shadow-lg.p-6
+        %h2.text-xl.font-semibold.text-brown-black.mb-4 Statistics
+        %div.space-y-4
+          %div
+            %p.text-sm.font-medium.text-gray-600 Total Orders
+            %p.text-2xl.font-bold.text-brown-black= @customer.orders.count
+          %div
+            %p.text-sm.font-medium.text-gray-600 Total Spent
+            %p.text-2xl.font-bold.text-green-600 $#{@customer.orders.sum(:total)}
+          %div
+            %p.text-sm.font-medium.text-gray-600 Average Order Value
+            - if @customer.orders.any?
+              %p.text-xl.font-semibold.text-amber-600 $#{(@customer.orders.sum(:total) / @customer.orders.count.to_f).round(2)}
+            - else
+              %p.text-gray-400 N/A

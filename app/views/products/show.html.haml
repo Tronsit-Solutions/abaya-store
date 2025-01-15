@@ -1,0 +1,42 @@
+.max-w-7xl.mx-auto.px-4.py-16
+  .grid.grid-cols-1.lg:grid-cols-2.gap-12{ data: { controller: "reveal", reveal_step_value: 120 } }
+    / Product Image - Full Height
+    .card.card-hover.overflow-hidden.reveal-initial.hover-anim.product-show-image-wrapper{ data: { reveal_target: "item" } }
+      - if @product.image.attached?
+        = image_tag @product.image, class: "w-full h-full object-cover product-show-image"
+      - else
+        .w-full.h-full.bg-gray-200.flex.items-center.justify-center.product-show-image-fallback{:style => "min-height: 600px; background-image: url('#{asset_path 'abaya2.jpg'}'); background-size: cover; background-position: center;"}
+          %span.text-gray-500.text-xl No Image Available
+    / Product Details
+    .card.p-8.reveal-initial.product-details-enter{ data: { reveal_target: "item" } }
+      %div.accent-gradient.h-1.w-24.rounded.mb-6
+      %h1.heading-tight.text-4xl.text-brown-black.mb-3= @product.name
+      .mb-6.flex.items-center.gap-4
+        %span.text-4xl.font-bold.text-amber-600 $#{@product.price}
+        %span.text-lg.muted
+          Stock: #{@product.stock}
+      .mb-6
+        %h3.text-lg.font-semibold.text-brown-black.mb-2 Description
+        %p.muted.leading-relaxed= @product.description
+      .mb-6
+        %h3.text-lg.font-semibold.text-brown-black.mb-2 Availability
+        - if @product.available?
+          %span.inline-flex.items-center.px-3.py-1.rounded-full.text-sm.font-medium.bg-green-100.text-green-800
+            ✓ In Stock
+        - else
+          %span.inline-flex.items-center.px-3.py-1.rounded-full.text-sm.font-medium.bg-red-100.text-red-800
+            ✗ Out of Stock
+      - if user_signed_in?
+        .space-y-4
+          = form_with url: cart_items_path, method: :post, local: true, class: "flex items-center space-x-4", data: { controller: "cart", action: "submit->cart#add", cart_message_value: "Added #{@product.name} to cart" } do |form|
+            = form.hidden_field :product_id, value: @product.id
+            .flex.items-center.space-x-2
+              %label.text-sm.font-medium.text-brown-black{:for => "quantity"} Quantity:
+              = form.number_field :quantity, value: 1, min: 1, max: @product.stock, class: "w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            = form.submit "Add to Cart", class: "bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors disabled:opacity-50 hover-anim", disabled: !@product.available?
+      - else
+        .bg-amber-50.border.border-amber-200.rounded-lg.p-4
+          %p.text-amber-800
+            Please #{link_to "sign in", new_user_session_path, class: "font-semibold underline"} to add items to your cart.
+      .mt-8.pt-6.border-t.border-gray-200
+        = link_to "← Back to Products", products_path, class: "text-amber-600 hover:text-amber-700 font-medium"

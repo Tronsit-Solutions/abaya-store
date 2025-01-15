@@ -1,0 +1,103 @@
+%h1.text-3xl.font-bold.text-brown-black.mb-8 Admin Dashboard
+
+/ Statistics Cards
+.grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-4.gap-6.mb-8
+  .bg-white.rounded-lg.shadow-md.p-6.border.border-beige
+    .flex.items-center
+      .p-3.rounded-full.bg-blue-100.mr-4
+        %svg.w-6.h-6.text-blue-600{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+          %path{:d => "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+      .div
+        %p.text-sm.font-medium.text-gray-600 Total Products
+        %p.text-2xl.font-semibold.text-brown-black #{@total_products}
+
+  .bg-white.rounded-lg.shadow-md.p-6.border.border-beige
+    .flex.items-center
+      .p-3.rounded-full.bg-green-100.mr-4
+        %svg.w-6.h-6.text-green-600{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+          %path{:d => "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+      .div
+        %p.text-sm.font-medium.text-gray-600 Total Customers
+        %p.text-2xl.font-semibold.text-brown-black #{@total_customers}
+
+  .bg-white.rounded-lg.shadow-md.p-6.border.border-beige
+    .flex.items-center
+      .p-3.rounded-full.bg-amber-100.mr-4
+        %svg.w-6.h-6.text-amber-600{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+          %path{:d => "M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+      .div
+        %p.text-sm.font-medium.text-gray-600 Total Orders
+        %p.text-2xl.font-semibold.text-brown-black #{@total_orders}
+
+  .bg-white.rounded-lg.shadow-md.p-6.border.border-beige
+    .flex.items-center
+      .p-3.rounded-full.bg-purple-100.mr-4
+        %svg.w-6.h-6.text-purple-600{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+          %path{:d => "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+      .div
+        %p.text-sm.font-medium.text-gray-600 Total Revenue
+        %p.text-2xl.font-semibold.text-brown-black $#{@total_revenue}
+
+/ Main Content Grid
+.grid.grid-cols-1.lg:grid-cols-2.gap-8
+  / Recent Orders
+  .bg-white.rounded-lg.shadow-md.border.border-beige
+    .p-6.border-b.border-beige
+      %h2.text-xl.font-semibold.text-brown-black.mb-4 Recent Orders
+    .p-6
+      - if @recent_orders.any?
+        .space-y-4
+          - @recent_orders.each do |order|
+            .flex.items-center.justify-between.p-4.bg-warm-beige.rounded-lg
+              .div
+                %p.font-medium.text-brown-black Order ##{order.id}
+                %p.text-sm.text-gray-600 #{order.user.email}
+                %p.text-sm.text-gray-500 #{order.created_at.strftime('%B %d, %Y at %I:%M %p')}
+              .div.text-right
+                %p.font-semibold.text-brown-black $#{order.total}
+                %span.inline-flex.px-2.py-1.text-xs.font-semibold.rounded-full{class: "bg-#{order.status == 'pending' ? 'yellow' : order.status == 'paid' ? 'green' : 'blue'}-100 text-#{order.status == 'pending' ? 'yellow' : order.status == 'paid' ? 'green' : 'blue'}-800"}
+                  = order.status.capitalize
+      - else
+        %p.text-gray-500.text-center.py-8 No recent orders
+
+  / Low Stock Products
+  .bg-white.rounded-lg.shadow-md.border.border-beige
+    .p-6.border-b.border-beige
+      %h2.text-xl.font-semibold.text-brown-black.mb-4 Low Stock Alert
+    .p-6
+      - if @low_stock_products.any?
+        .space-y-4
+          - @low_stock_products.each do |product|
+            .flex.items-center.justify-between.p-4.bg-red-50.rounded-lg.border.border-red-200
+              .div
+                %p.font-medium.text-brown-black #{product.name}
+                %p.text-sm.text-gray-600 Stock: #{product.stock}
+              .div.text-right
+                %p.font-semibold.text-brown-black $#{product.price}
+                = link_to "Restock", edit_admin_product_path(product), class: "text-sm text-blue-600 hover:text-blue-800"
+      - else
+        %p.text-gray-500.text-center.py-8 All products are well stocked
+
+/ Top Products
+.bg-white.rounded-lg.shadow-md.border.border-beige.mt-8
+  .p-6.border-b.border-beige
+    %h2.text-xl.font-semibold.text-brown-black.mb-4 Top Selling Products
+  .p-6
+    - if @top_products.any?
+      .overflow-x-auto
+        %table.w-full
+          %thead
+            %tr.border-b.border-beige
+              %th.text-left.py-3.px-4.font-medium.text-brown-black Product Name
+              %th.text-left.py-3.px-4.font-medium.text-brown-black Price
+              %th.text-left.py-3.px-4.font-medium.text-brown-black Stock
+              %th.text-left.py-3.px-4.font-medium.text-brown-black Total Sold
+          %tbody
+            - @top_products.each do |product|
+              %tr.border-b.border-beige.hover:bg-warm-beige
+                %td.py-3.px-4.font-medium.text-brown-black #{product.name}
+                %td.py-3.px-4.text-gray-600 $#{product.price}
+                %td.py-3.px-4.text-gray-600 #{product.stock}
+                %td.py-3.px-4.text-gray-600 #{product.order_items.sum(:quantity)}
+    - else
+      %p.text-gray-500.text-center.py-8 No sales data available

@@ -1,0 +1,92 @@
+- return unless category
+- hero_product = category[:hero_product]
+- supporting_products = category[:supporting_products] || []
+- latest_drop = category[:updated_at]
+- freshness = latest_drop.present? ? time_ago_in_words(latest_drop) : "moments ago"
+- accent_gradient = category[:accent] || "from-amber-500 via-orange-400 to-rose-400"
+
+.max-w-7xl.mx-auto.px-4
+  / Hero Product Section
+  - if hero_product
+    .grid.grid-cols-1.lg:grid-cols-2.gap-8.mb-12
+      / Product Image
+      .relative.rounded-2xl.overflow-hidden.shadow-xl.bg-gray-100
+        - if hero_product.image.attached?
+          = image_tag hero_product.image, class: "w-full h-full object-cover", alt: hero_product.name, style: "min-height: 500px;"
+        - else
+          .w-full.bg-cover.bg-center{ style: "background-image: url('#{asset_path 'abaya1.jpg'}'); min-height: 500px;" }
+      
+      / Product Details
+      .flex.flex-col.justify-center
+        .mb-4
+          %span.inline-block.px-4.py-2.rounded-full.bg-purple-100.text-purple-700.text-sm.font-semibold.uppercase
+            = category[:name]
+        %h2.text-4xl.md:text-5xl.font-bold.text-brown-black.mb-4
+          = hero_product.name
+        %p.text-lg.text-gray-600.mb-6
+          = hero_product.description
+        .flex.items-center.gap-6.mb-6
+          %span.text-4xl.font-bold.text-purple-600
+            = number_to_currency(hero_product.price)
+          - if hero_product.stock.positive?
+            %span.inline-flex.items-center.gap-2.px-4.py-2.rounded-full.bg-green-100.text-green-700.text-sm.font-semibold
+              %svg.w-4.h-4{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+                %path{:d => "M5 13l4 4L19 7", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+              In Stock
+          - else
+            %span.inline-flex.items-center.gap-2.px-4.py-2.rounded-full.bg-red-100.text-red-700.text-sm.font-semibold
+              Out of Stock
+        .flex.gap-4
+          = link_to product_path(hero_product), class: "px-6 py-3 bg-brown-black text-white rounded-lg font-semibold hover:bg-gray-900 transition-colors" do
+            View Details
+          = link_to products_path(category: category[:name]), class: "px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:border-gray-400 transition-colors" do
+            View Collection
+
+  / Stats Section
+  .grid.grid-cols-1.md:grid-cols-3.gap-6.mb-12
+    .bg-gradient-to-br.rounded-xl.p-6.text-white.shadow-lg{ class: accent_gradient }
+      %p.text-sm.uppercase.tracking-wide.mb-2.opacity-90 Collection Size
+      %p.text-3xl.font-bold= category[:total_products]
+      %p.text-sm.opacity-80 curated pieces
+    .bg-white.rounded-xl.p-6.border.border-purple-200.shadow-md
+      %p.text-sm.uppercase.tracking-wide.mb-2.text-gray-600 Starting At
+      %p.text-3xl.font-bold.text-brown-black= number_to_currency(category[:starting_price] || hero_product&.price)
+      %p.text-sm.text-gray-600 accessible luxury
+    .bg-pink-50.rounded-xl.p-6.border.border-pink-200
+      %p.text-sm.uppercase.tracking-wide.mb-2.text-pink-700 Latest Update
+      %p.text-2xl.font-bold.text-pink-900= freshness.titleize
+      %p.text-sm.text-pink-700 ago
+
+  / Supporting Products
+  - if supporting_products.present?
+    .mb-8
+      .flex.items-center.justify-between.mb-6
+        %h3.text-2xl.md:text-3xl.font-bold.text-brown-black
+          More from #{category[:name]}
+        = link_to products_path(category: category[:name]), class: "text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2" do
+          View All
+          %svg.w-4.h-4{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+            %path{:d => "M9 5l7 7-7 7", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+      
+      .grid.grid-cols-1.sm:grid-cols-2.lg:grid-cols-3.gap-6
+        - supporting_products.each do |product|
+          .bg-white.rounded-xl.overflow-hidden.shadow-lg.border.border-purple-100.hover:shadow-xl.hover:border-purple-300.transition-all.duration-300
+            .relative.h-64.bg-gray-100
+              - if product.image.attached?
+                = image_tag product.image, class: "w-full h-full object-cover", alt: product.name
+              - else
+                .w-full.h-full.bg-cover.bg-center{ style: "background-image: url('#{asset_path 'abaya2.jpg'}');" }
+            .p-5
+              %h4.text-lg.font-bold.text-brown-black.mb-2
+                = product.name
+              %p.text-sm.text-gray-600.mb-4.line-clamp-2
+                = truncate(product.description, length: 80)
+              .flex.items-center.justify-between
+                %span.text-xl.font-bold.text-purple-600
+                  = number_to_currency(product.price)
+                - if product.stock.positive?
+                  %span.text-xs.px-2.py-1.rounded.bg-green-100.text-green-700.font-semibold
+                    In Stock
+                - else
+                  %span.text-xs.px-2.py-1.rounded.bg-red-100.text-red-700.font-semibold
+                    Out of Stock

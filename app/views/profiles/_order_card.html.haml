@@ -1,0 +1,46 @@
+- status_classes = {"pending" => "bg-yellow-100 text-yellow-800","paid" => "bg-blue-100 text-blue-800","shipped" => "bg-purple-100 text-purple-800","delivered" => "bg-green-100 text-green-800","cancelled" => "bg-red-100 text-red-800"}
+- badge_class = status_classes.fetch(order.status, "bg-gray-100 text-gray-800")
+
+.bg-white.border.border-purple-100.rounded-3xl.shadow-lg.p-6.md:p-8.transition-all.duration-300.hover:shadow-xl
+  .flex.flex-col.md:flex-row.md:items-center.justify-between.gap-4.mb-5
+    .space-y-1
+      %h3.text-xl.font-semibold.text-brown-black
+        Order ##{order.id}
+      %p.text-sm.text-gray-500
+        Placed on #{l(order.created_at, format: :long)}
+    .flex.items-center.gap-3.flex-wrap
+      %span.inline-flex.items-center.gap-2.px-3.py-1.rounded-full.text-sm.font-semibold{ class: badge_class }
+        %span.h-2.w-2.rounded-full.bg-current.opacity-70
+        = order.status.titleize
+      %span.text-sm.text-gray-500
+        Total:
+        %span.font-semibold= number_to_currency(order.total)
+
+  / Order items
+  .grid.grid-cols-1.sm:grid-cols-2.gap-4.mb-6
+    - order.order_items.each do |item|
+      .bg-purple-50.rounded-2xl.p-4.border.border-purple-100.flex.items-start.gap-3
+        - if item.product&.image&.attached?
+          = image_tag item.product.image, class: "w-16 h-16 rounded-xl object-cover", alt: item.product.name
+        - else
+          .w-16.h-16.bg-purple-200.rounded-xl.flex.items-center.justify-center.text-white.font-semibold
+            = item.product&.name&.first&.upcase || "?"
+        .space-y-1
+          %p.font-semibold.text-brown-black= item.product&.name || "Product"
+          %p.text-sm.text-gray-600 Quantity: #{item.quantity}
+          %p.text-sm.text-gray-600 Item total:
+          %span.font-semibold= number_to_currency(item.price * item.quantity)
+
+  .flex.flex-col.md:flex-row.md:items-center.justify-between.gap-4.text-sm.text-gray-600
+    %p
+      %span.font-semibold Payment Status:
+      = order.status == "cancelled" ? "Refunded/Cancelled" : "Completed"
+    %p
+      %span.font-semibold Expected Delivery:
+      = order.created_at.advance(days: 7).strftime("%B %d, %Y")
+    %div
+      = link_to "View Order", order_path(order), class: "inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold transition-colors"
+      - if order.status != "cancelled"
+        %span.text-gray-300.mx-2 •
+        %span.text-purple-500.text-xs.uppercase.tracking-wide Ready for tracking soon
+

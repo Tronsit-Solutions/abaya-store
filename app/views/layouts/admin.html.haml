@@ -1,0 +1,77 @@
+!!!
+%html
+  %head
+    %title Admin Dashboard - Das Club
+    %meta{:name => "viewport", :content => "width=device-width,initial-scale=1"}
+    = csrf_meta_tags
+    = csp_meta_tag
+    = stylesheet_link_tag "application", "data-turbo-track": "reload"
+    = javascript_importmap_tags
+    %script{:src => "https://cdn.tailwindcss.com"}
+    :javascript
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {'light-beige': '#FEFCF8','beige': '#F5F5DC','brown-black': '#2C1810','warm-beige': '#F7F3E9'}
+          }
+        }
+      }
+  %body.bg-light-beige.text-brown-black.min-h-screen
+    / Admin Navigation
+    %nav.bg-warm-beige.shadow-lg.border-b.border-beige
+      .max-w-7xl.mx-auto.px-4.sm:px-6.lg:px-8
+        .flex.justify-between.items-center.h-16
+          / Logo
+          .flex.items-center
+            = link_to "Das Club Admin", admin_root_path, class: "text-2xl font-bold text-brown-black"
+          / Navigation Menu
+          .hidden.md:flex.items-center.space-x-8
+            = link_to "Dashboard", admin_root_path, class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors #{'bg-beige' if current_page?(admin_root_path)}"
+            = link_to "Products", admin_products_path, class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors #{'bg-beige' if current_page?(admin_products_path)}"
+            = link_to "Customers", admin_customers_path, class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors #{'bg-beige' if current_page?(admin_customers_path)}"
+            = link_to "Orders", admin_orders_path, class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors #{'bg-beige' if current_page?(admin_orders_path)}"
+            = link_to "Reports", admin_reports_path, class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors #{'bg-beige' if current_page?(admin_reports_path)}"
+          / User Menu
+          .flex.items-center.space-x-4
+            .text-sm.text-brown-black
+              Welcome, #{current_admin_user.email.split('@').first}
+            = link_to "Back to Site", root_path, class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            = link_to "Sign Out", destroy_admin_user_session_path, data: { turbo_method: :delete }, class: "bg-brown-black text-white hover:bg-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+
+    / Main Content
+    .flex.min-h-screen
+      / Sidebar
+      .w-64.bg-warm-beige.shadow-lg.border-r.border-beige
+        .p-6
+          %h3.text-lg.font-semibold.text-brown-black.mb-4 Quick Actions
+          .space-y-2
+            = link_to "Add New Product", new_admin_product_path, class: "block w-full text-left px-4 py-2 text-sm text-brown-black hover:bg-beige rounded-md transition-colors"
+            = link_to "View All Orders", admin_orders_path, class: "block w-full text-left px-4 py-2 text-sm text-brown-black hover:bg-beige rounded-md transition-colors"
+            = link_to "Low Stock Alert", admin_products_path(filter: 'low_stock'), class: "block w-full text-left px-4 py-2 text-sm text-brown-black hover:bg-beige rounded-md transition-colors"
+          
+          %h3.text-lg.font-semibold.text-brown-black.mb-4.mt-8 Statistics
+          .space-y-2.text-sm
+            .flex.justify-between
+              %span.text-gray-600 Total Products:
+              %span.font-semibold #{Product.count}
+            .flex.justify-between
+              %span.text-gray-600 Total Orders:
+              %span.font-semibold #{Order.count}
+            .flex.justify-between
+              %span.text-gray-600 Pending Orders:
+              %span.font-semibold.text-amber-600 #{Order.pending.count}
+            .flex.justify-between
+              %span.text-gray-600 Total Revenue:
+              %span.font-semibold.text-green-600 $#{Order.paid.sum(:total)}
+
+      / Content Area
+      .flex-1.p-8
+        / Flash Messages
+        - if notice
+          .bg-green-100.border.border-green-400.text-green-700.px-4.py-3.rounded.mb-4
+            = notice
+        - if alert
+          .bg-red-100.border.border-red-400.text-red-700.px-4.py-3.rounded.mb-4
+            = alert
+
+        = yield

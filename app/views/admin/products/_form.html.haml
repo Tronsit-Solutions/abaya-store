@@ -1,0 +1,79 @@
+- product = local_assigns.fetch(:product)
+- submit_label = local_assigns.fetch(:submit_label, product.persisted? ? "Save Changes" : "Create Product")
+- cancel_path = local_assigns.fetch(:cancel_path, admin_products_path)
+- initial_filename = product.image.attached? ? product.image.filename.to_s : "No image selected"
+
+= form_with model: [:admin, product], local: true, multipart: true do |form|
+  - if product.errors.any?
+    .bg-red-50.border.border-red-200.rounded-2xl.p-6.mb-8.shadow-sm
+      %h3.text-red-800.font-semibold.mb-3
+        = "#{pluralize(product.errors.count, "error")} prohibited this product from being saved:"
+      %ul.space-y-1.text-sm.text-red-700
+        - product.errors.full_messages.each do |message|
+          %li.flex.items-start.gap-2
+            %span.mt-1.h-1.5.w-1.5.rounded-full.bg-red-400
+            %span= message
+
+  .grid.grid-cols-1.md:grid-cols-2.gap-6
+    .md:col-span-2
+      = form.label :name, class: "block text-sm font-semibold text-brown-black mb-2 tracking-wide uppercase"
+      = form.text_field :name, class: "w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all", placeholder: "Enter product name"
+
+    .md:col-span-2
+      = form.label :description, class: "block text-sm font-semibold text-brown-black mb-2 tracking-wide uppercase"
+      = form.text_area :description, rows: 5, class: "w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-y", placeholder: "Describe the story, fabric, and styling notes…"
+
+    .space-y-2
+      = form.label :category, class: "block text-sm font-semibold text-brown-black mb-2 tracking-wide uppercase"
+      = form.text_field :category, class: "w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all", placeholder: "e.g. Modern Luxe, Everyday Staples"
+      %p.text-xs.text-gray-500 Leading text used to power the category section & filters.
+
+    .space-y-2
+      = form.label :price, class: "block text-sm font-semibold text-brown-black mb-2 tracking-wide uppercase"
+      .relative
+        %span.absolute.left-3.top-1/2.-translate-y-1/2.text-gray-400.font-semibold $
+        = form.number_field :price, step: 0.01, class: "w-full pl-8 pr-3 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all", placeholder: "0.00"
+      %p.text-xs.text-gray-500 Price shown to shoppers & used to highlight starting price.
+
+    .space-y-2
+      = form.label :stock, class: "block text-sm font-semibold text-brown-black mb-2 tracking-wide uppercase"
+      = form.number_field :stock, min: 0, class: "w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all", placeholder: "Available quantity"
+      %p.text-xs.text-gray-500 Customers cannot purchase when stock reaches zero.
+
+    .md:col-span-2
+      = form.label :image, class: "block text-sm font-semibold text-brown-black mb-3 tracking-wide uppercase"
+      - original_src = product.image.attached? ? url_for(product.image) : ""
+      .space-y-4{ data: { controller: "image-preview", image_preview_original_src_value: original_src, image_preview_original_filename_value: initial_filename } }
+        .relative.group
+          .aspect-[4/3].w-full.rounded-3xl.border.border-dashed.border-brown-black/20.bg-gradient-to-br.from-amber-50.via-white.to-beige.p-1.transition-all.duration-500.group-hover:border-amber-400.group-hover:shadow-[0_25px_45px_-30px_rgba(214,119,57,0.55)]
+            .relative.w-full.h-full.rounded-[1.3rem].overflow-hidden.bg-white
+              %img.w-full.h-full.object-cover{ src: (product.image.attached? ? original_src : nil), class: product.image.attached? ? "" : "hidden", data: { image_preview_target: "image", original_src: original_src.presence } }
+              .absolute.inset-0.flex.flex-col.items-center.justify-center.gap-3.text-gray-500{ class: product.image.attached? ? "hidden" : "", data: { image_preview_target: "placeholder" } }
+                %div.flex.items-center.justify-center.w-14.h-14.rounded-full.bg-amber-100.text-amber-600
+                  %svg.w-7.h-7{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+                    %path{:d => "M3 7h4l2-3h6l2 3h4v13H3V7zm9 4a4 4 0 100 8 4 4 0 000-8z", "stroke-width" => "1.5", "stroke-linecap" => "round", "stroke-linejoin" => "round"}
+                %p.text-sm.font-medium Drag & drop or upload a featured image
+        .flex.flex-wrap.items-center.gap-4.text-sm
+          = form.file_field :image, class: "px-4 py-2.5 rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors file:hidden", data: { action: "change->image-preview#preview", image_preview_target: "input" }
+          %span.text-gray-500.flex.items-center.gap-2
+            %svg.w-4.h-4.text-amber-500{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+              %path{:d => "M12 4v16m8-8H4", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+            Recommended: 1200x900px • JPG or PNG
+        .flex.flex-wrap.items-center.gap-4
+          %span.text-sm.text-gray-600{ data: { image_preview_target: "filename", original_filename: initial_filename } }= initial_filename
+          - if product.image.attached?
+            .flex.items-center.gap-2
+              = check_box_tag "product[remove_image]", "1", false, class: "rounded border-gray-300 text-amber-600 focus:ring-amber-500", data: { action: "change->image-preview#toggleRemoval", image_preview_target: "removeToggle" }
+              = label_tag "product_remove_image", "Remove current image", class: "text-sm text-gray-600 cursor-pointer"
+
+  .flex.flex-wrap.items-center.justify-between.gap-4.mt-10
+    - if product.persisted?
+      %span.text-xs.font-medium.uppercase.tracking-[0.3em].text-gray-400
+        Updated #{time_ago_in_words(product.updated_at)} ago
+    - else
+      %span.text-xs.font-medium.uppercase.tracking-[0.3em].text-gray-400
+        Draft in progress
+    .flex.items-center.gap-3
+      = link_to "Cancel", cancel_path, class: "px-5 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+      = form.submit submit_label, class: "px-6 py-3 rounded-xl bg-amber-600 text-white font-semibold tracking-wide uppercase hover:bg-amber-700 transition-colors shadow-lg shadow-amber-600/30"
+
