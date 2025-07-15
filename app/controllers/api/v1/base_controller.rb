@@ -1,33 +1,14 @@
-class Api::V1::BaseController < ApplicationController
-  protect_from_forgery with: :null_session
+class Api::V1::BaseController < ActionController::API
+  include Devise::Controllers::Helpers
+
+  # All API v1 endpoints require an authenticated user
+  # (controllers can override/skip this when needed)
+  before_action :authenticate_user!
   respond_to :json
   
   rescue_from StandardError, with: :render_error_response
-  before_action :set_current_api_user
 
   private
-
-  def set_current_api_user
-    @current_api_user = authenticate_from_token
-  end
-
-  def require_api_auth!
-    render json: { error: 'Unauthorized' }, status: :unauthorized unless @current_api_user
-  end
-
-  def authenticate_from_token
-    token = request.headers['Authorization'].split(' ').last
-    return nil unless token
-    
-    payload = Warden::JWTAuth::TokenDecoder.new.call(token)
-    User.find(payload['sub'])
-  rescue => e
-    nil
-  end
-
-  def current_api_user
-    @current_api_user
-  end
 
   def render_json_response(data, status = :ok)
     render json: data, status: status

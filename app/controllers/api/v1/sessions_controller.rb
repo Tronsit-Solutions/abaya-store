@@ -10,13 +10,22 @@ class Api::V1::SessionsController < ApplicationController
     user = User.find_by(email: params.dig(:user, :email))
     
     if user&.valid_password?(params.dig(:user, :password))
-      # Generate JWT token
-      token = generate_jwt_token(user)
+      # Let Devise + devise-jwt generate the token via Warden.
+      # Use explicit scope so Warden hooks (including JWT) run correctly.
+      sign_in(:user, user)
+
+      # devise-jwt stores the generated token in the Rack env
+      token = request.env['warden-jwt_auth.token']
+
+      unless token.is_a?(String) && token.present?
+        Rails.logger.error "JWT token not present in warden env. Env value: #{request.env['warden-jwt_auth.token'].inspect}"
+        raise "JWT token generation failed: token missing from warden env"
+      end
       
       render json: { 
         success: true,
         message: 'Signed in successfully',
-        token: token,
+        token: token,  # The actual JWT string from devise-jwt
         user: { id: user.id, email: user.email }
       }
     else
@@ -44,12 +53,6 @@ class Api::V1::SessionsController < ApplicationController
   end
 
   private
-
-  def generate_jwt_token(user)
-    # Simple JWT generation with devise-jwt
-    _, token = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
-    token
-  end
 
   def render_error_response(exception)
     Rails.logger.error "API Error: #{exception.message}"

@@ -26,15 +26,19 @@ Devise.setup do |config|
   # Configure JWT for API authentication
   config.jwt do |jwt|
     jwt.secret = Rails.application.secret_key_base
+  
     jwt.dispatch_requests = [
       ['POST', %r{^/api/v1/sign_in$}],
       ['POST', %r{^/api/v1/sign_up$}]
     ]
+  
     jwt.revocation_requests = [
       ['DELETE', %r{^/api/v1/sign_out$}]
     ]
+  
     jwt.expiration_time = 24.hours.to_i
   end
+  
 
   # ==> Mailer Configuration
   # Configure the e-mail address which will be shown in Devise::Mailer,

@@ -13,20 +13,30 @@ class Order < ApplicationRecord
   scope :cancelled, -> { where(status: 'cancelled') }
 
   def self.create_from_cart(cart)
-    order = create!(
-      user: cart.user,
-      total: cart.total_price,
-      status: 'pending'
-    )
-
-    cart.cart_items.each do |cart_item|
-      order.order_items.create!(
-        product: cart_item.product,
-        quantity: cart_item.quantity,
-        price: cart_item.product.price
+    transaction do
+      order = create!(
+        user: cart.user,
+        total: cart.total_price,
+        status: 'pending'
       )
-    end
 
-    order
+      cart.cart_items.includes(:product).each do |cart_item|
+        product = cart_item.product
+
+        # Ensure there is still enough stock at the time of purchase
+        raise StandardError, "Insufficient stock for #{product.name}" if cart_item.quantity > product.stock
+
+        order.order_items.create!(
+          product: product,
+          quantity: cart_item.quantity,
+          price: product.price
+        )
+
+        # Reduce product stock after successfully creating the order item
+        product.reduce_stock(cart_item.quantity)
+      end
+
+      order
+    end
   end
 end

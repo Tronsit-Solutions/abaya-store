@@ -17,6 +17,9 @@ class Product < ApplicationRecord
   end
 
   def reduce_stock(quantity)
+    raise ArgumentError, "Quantity must be positive" if quantity.to_i <= 0
+    raise StandardError, "Insufficient stock" if quantity > stock
+
     update!(stock: stock - quantity)
   end
 end
