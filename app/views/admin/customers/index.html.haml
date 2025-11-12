@@ -1,0 +1,34 @@
+.flex.justify-between.items-center.mb-8
+  %h1.text-3xl.font-bold.text-brown-black Customers
+
+/ Search
+.bg-white.rounded-lg.shadow-md.p-4.mb-6
+  = form_with url: admin_customers_path, method: :get, local: true, class: "flex gap-4" do |form|
+    %div.flex-1
+      = form.text_field :search, placeholder: "Search by email...", value: params[:search], class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+    = form.submit "Search", class: "bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors"
+
+/ Customers Table
+.bg-white.rounded-lg.shadow-md.overflow-hidden
+  %table.min-w-full.divide-y.divide-gray-200
+    %thead.bg-gray-50
+      %tr
+        %th.px-6.py-3.text-left.text-xs.font-medium.text-gray-500.uppercase.tracking-wider Email
+        %th.px-6.py-3.text-left.text-xs.font-medium.text-gray-500.uppercase.tracking-wider Member Since
+        %th.px-6.py-3.text-left.text-xs.font-medium.text-gray-500.uppercase.tracking-wider Total Orders
+        %th.px-6.py-3.text-left.text-xs.font-medium.text-gray-500.uppercase.tracking-wider Total Spent
+        %th.px-6.py-3.text-left.text-xs.font-medium.text-gray-500.uppercase.tracking-wider Actions
+    %tbody.bg-white.divide-y.divide-gray-200
+      - if @customers.any?
+        - @customers.each do |customer|
+          %tr.hover:bg-gray-50
+            %td.px-6.py-4.whitespace-nowrap.text-sm.font-medium.text-brown-black= customer.email
+            %td.px-6.py-4.whitespace-nowrap.text-sm.text-gray-500= customer.created_at.strftime("%b %d, %Y")
+            %td.px-6.py-4.whitespace-nowrap.text-sm.text-gray-500= customer.orders.count
+            %td.px-6.py-4.whitespace-nowrap.text-sm.font-semibold.text-green-600
+              $#{customer.orders.sum(:total)}
+            %td.px-6.py-4.whitespace-nowrap.text-sm.font-medium
+              = link_to "View", admin_customer_path(customer), class: "text-amber-600 hover:text-amber-700"
+      - else
+        %tr
+          %td.colspan-5.px-6.py-8.text-center.text-gray-500 No customers found

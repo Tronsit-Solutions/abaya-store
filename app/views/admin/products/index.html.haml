@@ -1,0 +1,60 @@
+.flex.justify-between.items-center.mb-8
+  %h1.text-3xl.font-bold.text-brown-black Products Management
+  = link_to "Add New Product", new_admin_product_path, class: "bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors"
+
+/ Search and Filter
+.bg-white.rounded-lg.shadow-md.p-6.mb-8.border.border-beige
+  = form_with url: admin_products_path, method: :get, local: true, class: "flex gap-4 items-end" do |form|
+    .flex-1
+      = form.label :search, "Search Products", class: "block text-sm font-medium text-brown-black mb-2"
+      = form.text_field :search, value: params[:search], placeholder: "Search by name...", class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+    .div
+      = form.label :filter, "Filter", class: "block text-sm font-medium text-brown-black mb-2"
+      = form.select :filter, [['All Products', ''], ['Low Stock', 'low_stock']], { selected: params[:filter] }, { class: "px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-transparent" }
+    .div
+      = form.submit "Search", class: "bg-brown-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+
+/ Products Table
+.bg-white.rounded-lg.shadow-md.border.border-beige
+  .p-6.border-b.border-beige
+    %h2.text-xl.font-semibold.text-brown-black Products (#{@products.count})
+  
+  .overflow-x-auto
+    %table.w-full
+      %thead.bg-warm-beige
+        %tr
+          %th.text-left.py-3.px-6.font-medium.text-brown-black Image
+          %th.text-left.py-3.px-6.font-medium.text-brown-black Name
+          %th.text-left.py-3.px-6.font-medium.text-brown-black Price
+          %th.text-left.py-3.px-6.font-medium.text-brown-black Stock
+          %th.text-left.py-3.px-6.font-medium.text-brown-black Status
+          %th.text-left.py-3.px-6.font-medium.text-brown-black Actions
+      %tbody
+        - @products.each do |product|
+          %tr.border-b.border-beige.hover:bg-warm-beige
+            %td.py-4.px-6
+              - if product.image.attached?
+                = image_tag product.image, class: "w-16 h-16 object-cover rounded-lg"
+              - else
+                .w-16.h-16.bg-gray-200.rounded-lg.flex.items-center.justify-center
+                  %span.text-gray-400.text-xs No Image
+            %td.py-4.px-6
+              .font-medium.text-brown-black #{product.name}
+              .text-sm.text-gray-600.mt-1 #{product.description.truncate(50)}
+            %td.py-4.px-6.font-semibold.text-brown-black $#{product.price}
+            %td.py-4.px-6
+              %span{class: "px-2 py-1 text-xs font-semibold rounded-full #{product.stock < 10 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}"}
+                #{product.stock}
+            %td.py-4.px-6
+              %span{class: "px-2 py-1 text-xs font-semibold rounded-full #{product.available? ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}"}
+                = product.available? ? 'Available' : 'Out of Stock'
+            %td.py-4.px-6
+              .flex.space-x-2
+                = link_to "View", admin_product_path(product), class: "text-blue-600 hover:text-blue-800 text-sm"
+                = link_to "Edit", edit_admin_product_path(product), class: "text-amber-600 hover:text-amber-800 text-sm"
+                = link_to "Delete", admin_product_path(product), method: :delete, data: { confirm: 'Are you sure?' }, class: "text-red-600 hover:text-red-800 text-sm"
+
+- if @products.empty?
+  .text-center.py-12
+    %p.text-gray-500 No products found
+    = link_to "Add your first product", new_admin_product_path, class: "text-amber-600 hover:text-amber-700 font-medium"

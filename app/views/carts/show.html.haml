@@ -1,0 +1,59 @@
+.max-w-6xl.mx-auto.py-12.px-4
+  %h1.text-4xl.font-bold.text-brown-black.mb-8 Shopping Cart
+  - if @cart_items.any?
+    .grid.grid-cols-1.lg:grid-cols-3.gap-8
+      / Cart Items
+      .lg:col-span-2
+        .space-y-4{ data: { controller: "cart-items" } }
+          - @cart_items.each do |cart_item|
+            .cart-item.bg-white.rounded-lg.shadow-lg.p-6{ data: { cart_item_id: cart_item.id } }
+              .flex.items-center.space-x-4
+                / Product Image
+                .flex-shrink-0
+                  - if cart_item.product.image.attached?
+                    = image_tag cart_item.product.image, class: "w-20 h-20 object-cover rounded-lg"
+                  - else
+                    .w-20.h-20.bg-gray-200.rounded-lg.flex.items-center.justify-center
+                      %span.text-gray-500.text-xs No Image
+                / Product Details
+                .flex-1.min-w-0
+                  %h3.text-lg.font-semibold.text-brown-black= cart_item.product.name
+                  %p.text-gray-600.text-sm.line-clamp-2= cart_item.product.description
+                  .flex.items-center.space-x-4.mt-2
+                    %span.text-amber-600.font-semibold
+                      $#{cart_item.product.price}
+                    %span.text-gray-500
+                      Qty: #{cart_item.quantity}
+                / Actions
+                .flex.flex-col.items-end.space-y-2
+                  %span.text-lg.font-bold.text-brown-black
+                    $#{cart_item.total_price}
+                  = link_to "Remove", cart_item_path(cart_item), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to remove this item?" }, class: "text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+      / Order Summary
+      .lg:col-span-1
+        .bg-white.rounded-lg.shadow-lg.p-6.sticky.top-4
+          %h2.text-xl.font-semibold.text-brown-black.mb-4 Order Summary
+          .space-y-3.mb-6
+            .flex.justify-between
+              %span.text-gray-600
+                Items (#{@cart.total_items})
+              %span.font-semibold
+                $#{@cart.total_price}
+            .flex.justify-between
+              %span.text-gray-600 Shipping
+              %span.font-semibold Free
+            .border-t.border-gray-200.pt-3
+              .flex.justify-between.text-lg.font-bold
+                %span.text-brown-black Total
+                %span.text-amber-600
+                  $#{@cart.total_price}
+          = link_to "Proceed to Checkout", checkout_path, class: "w-full bg-black text-white py-3 px-4 rounded-lg font-semibold text-center hover:bg-gray-800 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl block"
+          .mt-4.text-center
+            = link_to "Continue Shopping", products_path, class: "text-amber-600 hover:text-amber-700 font-medium"
+  - else
+    .text-center.py-12
+      .bg-white.rounded-lg.shadow-lg.p-12
+        .text-6xl.mb-4 🛒
+        %h2.text-2xl.font-semibold.text-brown-black.mb-4 Your cart is empty
+        %p.text-gray-600.mb-6 Looks like you haven't added any items to your cart yet.
+        = link_to "Start Shopping", products_path, class: "bg-amber-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"

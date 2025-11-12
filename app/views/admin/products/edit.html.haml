@@ -1,0 +1,15 @@
+.flex.flex-col.lg:flex-row.lg:items-center.lg:justify-between.gap-4.mb-10
+  %div
+    %small.block.uppercase.text-xs.font-semibold.text-amber-600.mb-3 Product Editor
+    %h1.text-4xl.font-bold.text-brown-black
+      Edit #{@product.name.presence || "Product"}
+    %p.text-gray-600.mt-2 Refine details, adjust inventory, or refresh imagery in real time.
+  .flex.flex-wrap.items-center.gap-3
+    = link_to admin_product_path(@product), class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-brown-black hover:bg-gray-50 transition-colors" do
+      %svg.w-4.h-4{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+        %path{:d => "M15 19l-7-7 7-7", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+      Back to product
+    = link_to "View All Products", admin_products_path, class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brown-black text-white hover:bg-gray-900 transition-colors"
+
+.bg-white.rounded-3xl.shadow-2xl.p-8.lg:p-10.border.border-beige
+  = render "form", product: @product, submit_label: "Save Changes", cancel_path: admin_product_path(@product)

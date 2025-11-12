@@ -1,0 +1,78 @@
+.max-w-7xl.mx-auto
+  / Header
+  .flex.justify-between.items-center.mb-8
+    %div
+      %h1.text-3xl.font-bold.text-brown-black Order ##{@order.id}
+      = link_to "← Back to Orders", admin_orders_path, class: "text-amber-600 hover:text-amber-700 font-medium mt-2 inline-block"
+    .flex.gap-3
+      = link_to "Edit", edit_admin_order_path(@order), class: "bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors"
+      = link_to "Delete", admin_order_path(@order), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+
+  .grid.grid-cols-1.lg:grid-cols-3.gap-8
+    / Main Content
+    .lg:col-span-2.space-y-6
+      / Order Items
+      .bg-white.rounded-lg.shadow-lg.p-6
+        %h2.text-xl.font-semibold.text-brown-black.mb-4 Order Items
+        .divide-y.divide-gray-200
+          - @order.order_items.includes(:product).each do |item|
+            .flex.items-center.py-4
+              .flex-shrink-0.mr-4
+                - if item.product.image.attached?
+                  = image_tag item.product.image, class: "w-16 h-16 object-cover rounded-lg"
+                - else
+                  .w-16.h-16.bg-gray-200.rounded-lg.flex.items-center.justify-center
+                    %span.text-xs.text-gray-500 No Image
+              .flex-1
+                %h3.text-lg.font-semibold.text-brown-black= item.product.name
+                %p.text-sm.text-gray-600 Quantity: #{item.quantity} × $#{item.price}
+              .text-right
+                %p.text-lg.font-bold.text-brown-black $#{item.total_price}
+
+        .border-t.border-gray-200.pt-4.mt-4
+          .flex.justify-between.items-center.text-lg.font-bold
+            %span.text-brown-black Total
+            %span.text-green-600 $#{@order.total}
+
+      / Order Status
+      .bg-white.rounded-lg.shadow-lg.p-6
+        %h2.text-xl.font-semibold.text-brown-black.mb-4 Order Status
+        = form_with model: [:admin, @order], local: true, class: "space-y-4" do |form|
+          %div
+            = form.label :status, class: "block text-sm font-medium text-gray-700 mb-2"
+            = form.select :status, options_for_select([["Pending", "pending"], ["Paid", "paid"], ["Shipped", "shipped"], ["Delivered", "delivered"], ["Cancelled", "cancelled"]], @order.status), {}, { class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent" }
+          = form.submit "Update Status", class: "bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors"
+
+    / Sidebar
+    .space-y-6
+      / Customer Info
+      .bg-white.rounded-lg.shadow-lg.p-6
+        %h2.text-xl.font-semibold.text-brown-black.mb-4 Customer Information
+        %div.space-y-3
+          %div
+            %p.text-sm.font-medium.text-gray-600 Email
+            %p.text-brown-black= @order.user.email
+          %div
+            %p.text-sm.font-medium.text-gray-600 Member Since
+            %p.text-brown-black= @order.user.created_at.strftime("%B %d, %Y")
+          %div
+            %p.text-sm.font-medium.text-gray-600 Total Orders
+            %p.text-brown-black= @order.user.orders.count
+          = link_to "View Customer", admin_customer_path(@order.user), class: "block text-center bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors mt-4"
+
+      / Order Details
+      .bg-white.rounded-lg.shadow-lg.p-6
+        %h2.text-xl.font-semibold.text-brown-black.mb-4 Order Details
+        %div.space-y-3
+          %div
+            %p.text-sm.font-medium.text-gray-600 Order Date
+            %p.text-brown-black= @order.created_at.strftime("%B %d, %Y at %I:%M %p")
+          %div
+            %p.text-sm.font-medium.text-gray-600 Status
+            %span.inline-block.px-3.py-1.rounded-full.text-sm.font-medium{class: order_status_class(@order.status)}= @order.status.capitalize
+          %div
+            %p.text-sm.font-medium.text-gray-600 Total Items
+            %p.text-brown-black= @order.order_items.sum(:quantity)
+          %div
+            %p.text-sm.font-medium.text-gray-600 Order Total
+            %p.text-2xl.font-bold.text-green-600 $#{@order.total}

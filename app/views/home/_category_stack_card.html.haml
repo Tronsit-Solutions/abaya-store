@@ -1,0 +1,95 @@
+- return unless category
+- hero_product = category[:hero_product]
+- supporting_products = category[:supporting_products] || []
+- latest_drop = category[:updated_at]
+- freshness = latest_drop.present? ? time_ago_in_words(latest_drop) : "moments ago"
+- accent_gradient = category[:accent] || "from-purple-500 via-pink-400 to-rose-400"
+
+.max-w-6xl.mx-auto.px-4
+  .bg-white.rounded-3xl.shadow-2xl.overflow-hidden.border.border-purple-100.transition-all.duration-500
+    / Hero Section
+    .relative.h-[60vh].min-h-[500px].overflow-hidden
+      - if hero_product&.image&.attached?
+        = image_tag hero_product.image, class: "w-full h-full object-cover", alt: hero_product.name
+      - else
+        .w-full.h-full.bg-cover.bg-center{ style: "background-image: url('#{asset_path 'abaya1.jpg'}');" }
+      
+      / Gradient Overlay
+      .absolute.inset-0.bg-gradient-to-t.from-black/80.via-black/40.to-transparent
+      
+      / Category Badge
+      .absolute.top-8.left-8.z-10
+        %span.inline-flex.items-center.gap-2.px-5.py-3.rounded-full.bg-white/95.backdrop-blur-md.text-purple-700.text-sm.font-bold.uppercase.tracking-wide.shadow-lg
+          = category[:name]
+      
+      / Hero Content
+      - if hero_product
+        .absolute.bottom-0.left-0.right-0.z-10.p-8.md:p-12
+          .max-w-3xl
+            %h2.text-4xl.md:text-5xl.lg:text-6xl.font-black.text-white.mb-4.drop-shadow-2xl
+              = hero_product.name
+            .flex.items-center.gap-6.mb-6.flex-wrap
+              %span.text-4xl.md:text-5xl.font-black.text-white.drop-shadow-lg
+                = number_to_currency(hero_product.price)
+              - if hero_product.stock.positive?
+                %span.inline-flex.items-center.gap-2.px-4.py-2.rounded-full.bg-green-500/90.text-white.text-sm.font-bold.uppercase.shadow-lg
+                  %svg.w-4.h-4{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+                    %path{:d => "M5 13l4 4L19 7", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+                  In Stock
+            .flex.gap-4.flex-wrap
+              = link_to product_path(hero_product), class: "px-8 py-4 bg-white text-brown-black rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-300 shadow-xl hover:scale-105" do
+                View Details
+              = link_to products_path(category: category[:name]), class: "px-8 py-4 border-2 border-white/50 bg-white/10 backdrop-blur-md text-white rounded-xl font-bold text-lg hover:bg-white/20 transition-all duration-300" do
+                Explore Collection
+
+    / Content Section
+    .p-8.md:p-12.bg-white
+      / Stats
+      .grid.grid-cols-1.md:grid-cols-3.gap-6.mb-12
+        .bg-gradient-to-br.rounded-2xl.p-8.text-white.shadow-xl{ class: accent_gradient }
+          %p.text-sm.uppercase.tracking-wide.mb-2.opacity-90 Collection Size
+          %p.text-4xl.font-black.mb-1= category[:total_products]
+          %p.text-sm.opacity-80 curated pieces
+        .bg-purple-50.rounded-2xl.p-8.border-2.border-purple-200
+          %p.text-sm.uppercase.tracking-wide.mb-2.text-purple-700 Starting At
+          %p.text-4xl.font-black.text-brown-black.mb-1= number_to_currency(category[:starting_price] || hero_product&.price)
+          %p.text-sm.text-gray-600 accessible luxury
+        .bg-pink-50.rounded-2xl.p-8.border-2.border-pink-200
+          %p.text-sm.uppercase.tracking-wide.mb-2.text-pink-700 Latest Update
+          %p.text-3xl.font-black.text-pink-900.mb-1= freshness.titleize
+          %p.text-sm.text-pink-700 ago
+
+      / Supporting Products
+      - if supporting_products.present?
+        .mb-6
+          .flex.items-center.justify-between.mb-6
+            %h3.text-2xl.md:text-3xl.font-bold.text-brown-black
+              More from #{category[:name]}
+            = link_to products_path(category: category[:name]), class: "text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2" do
+              View All
+              %svg.w-4.h-4{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+                %path{:d => "M9 5l7 7-7 7", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
+          
+          .grid.grid-cols-1.sm:grid-cols-2.lg:grid-cols-3.gap-6
+            - supporting_products.each do |product|
+              .bg-white.rounded-xl.overflow-hidden.shadow-lg.border.border-purple-100.hover:shadow-2xl.hover:border-purple-300.transition-all.duration-300
+                .relative.h-64.bg-gray-100
+                  - if product.image.attached?
+                    = image_tag product.image, class: "w-full h-full object-cover", alt: product.name
+                  - else
+                    .w-full.h-full.bg-cover.bg-center{ style: "background-image: url('#{asset_path 'abaya2.jpg'}');" }
+                .p-5
+                  %h4.text-lg.font-bold.text-brown-black.mb-2
+                    = product.name
+                  %p.text-sm.text-gray-600.mb-4.line-clamp-2
+                    = truncate(product.description, length: 80)
+                  .flex.items-center.justify-between
+                    %span.text-xl.font-bold.text-purple-600
+                      = number_to_currency(product.price)
+                    - if product.stock.positive?
+                      %span.text-xs.px-2.py-1.rounded.bg-green-100.text-green-700.font-semibold
+                        In Stock
+                    - else
+                      %span.text-xs.px-2.py-1.rounded.bg-red-100.text-red-700.font-semibold
+                        Out of Stock
+

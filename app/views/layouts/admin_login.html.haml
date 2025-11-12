@@ -1,0 +1,25 @@
+!!!
+%html
+  %head
+    %title Admin Login - Das Club
+    %meta{:name => "viewport", :content => "width=device-width,initial-scale=1"}
+    = csrf_meta_tags
+    = csp_meta_tag
+    = stylesheet_link_tag "application", "data-turbo-track": "reload"
+    = javascript_importmap_tags
+    %script{:src => "https://cdn.tailwindcss.com"}
+    :javascript
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'light-beige': '#FEFCF8',
+              'beige': '#F5F5DC',
+              'brown-black': '#2C1810',
+              'warm-beige': '#F7F3E9'
+            }
+          }
+        }
+      }
+  %body.bg-light-beige.text-brown-black.min-h-screen
+    = yield

@@ -1,0 +1,94 @@
+.max-w-6xl.mx-auto.py-12.px-4
+  .mb-8
+    %h1.text-4xl.font-bold.text-brown-black.mb-2 Checkout
+    %p.text-gray-600 Complete your order below
+  .grid.grid-cols-1.lg:grid-cols-3.gap-8
+    / Checkout Form
+    .lg:col-span-2
+      .bg-white.rounded-lg.shadow-lg.p-8.mb-8
+        %h2.text-2xl.font-semibold.text-brown-black.mb-6 Shipping Information
+        = form_with url: orders_path, method: :post, local: true, class: "space-y-6", data: { controller: "checkout" } do |f|
+          .grid.grid-cols-1.md:grid-cols-2.gap-6
+            .field
+              = f.label :first_name, "First Name", class: "block text-sm font-medium text-brown-black mb-2"
+              = f.text_field :first_name, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent", placeholder: "John"
+            .field
+              = f.label :last_name, "Last Name", class: "block text-sm font-medium text-brown-black mb-2"
+              = f.text_field :last_name, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent", placeholder: "Doe"
+          .field
+            = f.label :email, "Email Address", class: "block text-sm font-medium text-brown-black mb-2"
+            = f.email_field :email, value: current_user.email, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent", placeholder: "john@example.com"
+          .field
+            = f.label :phone, "Phone Number", class: "block text-sm font-medium text-brown-black mb-2"
+            = f.telephone_field :phone, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent", placeholder: "+1 (555) 123-4567"
+          .field
+            = f.label :address, "Street Address", class: "block text-sm font-medium text-brown-black mb-2"
+            = f.text_field :address, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent", placeholder: "123 Main Street"
+          .grid.grid-cols-1.md:grid-cols-3.gap-6
+            .field
+              = f.label :city, "City", class: "block text-sm font-medium text-brown-black mb-2"
+              = f.text_field :city, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent", placeholder: "New York"
+            .field
+              = f.label :state, "State/Province", class: "block text-sm font-medium text-brown-black mb-2"
+              = f.text_field :state, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent", placeholder: "NY"
+            .field
+              = f.label :zip_code, "ZIP/Postal Code", class: "block text-sm font-medium text-brown-black mb-2"
+              = f.text_field :zip_code, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent", placeholder: "10001"
+          .field
+            = f.label :country, "Country", class: "block text-sm font-medium text-brown-black mb-2"
+            = f.text_field :country, value: "United States", required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          
+          / Payment Section (Stripe will be added later)
+          .border-t.border-gray-200.pt-6.mt-6
+            %h2.text-2xl.font-semibold.text-brown-black.mb-6 Payment Information
+            .bg-amber-50.border.border-amber-200.rounded-lg.p-4.mb-6
+              %p.text-amber-800.text-sm
+                %strong Payment processing will be integrated with Stripe.
+                For now, you can proceed with the order.
+            / Placeholder for Stripe Elements
+            #stripe-card-element.bg-gray-50.border.border-gray-300.rounded-lg.p-4.mb-4
+              %p.text-gray-500.text-sm.text-center Stripe payment form will appear here
+          
+          = f.submit "Place Order", class: "w-full bg-black text-white py-4 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+    
+    / Order Summary Sidebar
+    .lg:col-span-1
+      .bg-white.rounded-lg.shadow-lg.p-6.sticky.top-4
+        %h2.text-xl.font-semibold.text-brown-black.mb-4 Order Summary
+        .space-y-4.mb-6
+          - @cart_items.each do |cart_item|
+            .flex.items-start.space-x-3.pb-4.border-b.border-gray-200
+              .flex-shrink-0
+                - if cart_item.product.image.attached?
+                  = image_tag cart_item.product.image, class: "w-16 h-16 object-cover rounded-lg"
+                - else
+                  .w-16.h-16.bg-gray-200.rounded-lg.flex.items-center.justify-center
+                    %span.text-gray-500.text-xs No Image
+              .flex-1.min-w-0
+                %h3.text-sm.font-semibold.text-brown-black= cart_item.product.name
+                %p.text-gray-500.text-xs Qty: #{cart_item.quantity}
+                %span.text-sm.font-semibold.text-amber-600
+                  $#{cart_item.total_price}
+        
+        .space-y-3.mb-6.pt-4.border-t.border-gray-200
+          .flex.justify-between
+            %span.text-gray-600 Subtotal
+            %span.font-semibold
+              $#{@cart.total_price}
+          .flex.justify-between
+            %span.text-gray-600 Shipping
+            %span.font-semibold.text-green-600 Free
+          .flex.justify-between
+            %span.text-gray-600 Tax
+            %span.font-semibold
+              $#{sprintf('%.2f', @cart.total_price * 0.08)}
+          .border-t.border-gray-200.pt-3
+            .flex.justify-between.text-lg.font-bold
+              %span.text-brown-black Total
+              %span.text-amber-600
+                $#{sprintf('%.2f', @cart.total_price * 1.08)}
+        
+        .mt-6
+          = link_to "← Back to Cart", cart_path, class: "text-amber-600 hover:text-amber-700 font-medium text-sm"
+
+

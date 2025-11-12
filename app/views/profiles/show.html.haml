@@ -1,0 +1,46 @@
+- content_for :title, "My Profile"
+
+.bg-gradient-to-br.from-slate-50.via-purple-50.to-pink-50.py-12
+  .max-w-6xl.mx-auto.px-4.space-y-10
+    / Hero section
+    .bg-white.rounded-3xl.shadow-xl.p-8.md:p-12.flex.flex-col.md:flex-row.gap-8.items-center
+      .w-32.h-32.rounded-full.bg-gradient-to-br.from-purple-500.to-pink-500.text-white.flex.items-center.justify-center.text-3xl.font-bold
+        = @user.email.first(2).upcase
+      .flex-1.space-y-3.text-center.md:text-left
+        %h1.text-3xl.md:text-4xl.font-bold.text-brown-black
+          = @user.email.split('@').first.titleize
+        %p.text-gray-600
+          %span.font-semibold Email:
+          = @user.email
+        %p.text-gray-600
+          %span.font-semibold Member since:
+          = l(@user.created_at.to_date, format: :long)
+      .grid.grid-cols-2.gap-4.text-center
+        .bg-purple-50.border.border-purple-200.rounded-2xl.p-4
+          %p.text-xs.font-semibold.text-purple-600.uppercase.tracking-wide Orders
+          %p.text-2xl.font-bold.text-brown-black= @orders.count
+        .bg-pink-50.border.border-pink-200.rounded-2xl.p-4
+          %p.text-xs.font-semibold.text-pink-600.uppercase.tracking-wide Lifetime Spend
+          %p.text-2xl.font-bold.text-brown-black= number_to_currency(@orders.sum(&:total))
+
+    / Orders section
+    .space-y-6
+      .flex.items-center.justify-between
+        %h2.text-2xl.font-bold.text-brown-black Order History
+        - if @orders.any?
+          %p.text-sm.text-gray-600
+            = pluralize(@orders.count, "order")
+            recorded
+
+      - if @orders.any?
+        .space-y-6
+          - @orders.each do |order|
+            = render "order_card", order: order
+      - else
+        .bg-white.border.border-dashed.border-purple-200.rounded-3xl.p-12.text-center.space-y-4.shadow-lg
+          %div.text-5xl.mb-2 🎁
+          %h3.text-2xl.font-semibold.text-brown-black No orders yet
+          %p.text-gray-600
+            When you place orders, they will appear here with tracking information and order summaries.
+          = link_to "Start Shopping", products_path, class: "inline-flex items-center gap-2 px-5 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg"
+

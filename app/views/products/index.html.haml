@@ -1,0 +1,36 @@
+.container.mx-auto.py-8
+  .mb-8
+    .flex.items-center.justify-between.gap-4.mb-4
+      %div.flex-1
+        %h1.text-4xl.font-bold.text-brown-black Our Collection
+        .h-1.w-24.bg-amber-600.mt-3.rounded
+      - if @categories.present?
+        = form_with url: products_path, method: :get, local: true, class: "flex items-center gap-3", data: { controller: "category-filter" } do |form|
+          %label.text-sm.font-medium.text-brown-black{:for => "category-filter"} Category:
+          = form.select :category, options_for_select([["All Categories", ""]] + @categories.map { |c| [c, c] }, params[:category]), {}, { id: "category-filter", class: "px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white cursor-pointer", data: { action: "change->category-filter#submit" } }
+          - if params[:search].present?
+            = form.hidden_field :search, value: params[:search]
+  .grid.grid-cols-1.sm:grid-cols-2.lg:grid-cols-3.gap-8{ data: { controller: "reveal", reveal_step_value: 100 } }
+    - @products.each do |product|
+      .card.card-hover.overflow-hidden.reveal-initial{ data: { reveal_target: "item" } }
+        .product-image-wrapper.w-full.h-84
+          - if product.image.attached?
+            = image_tag product.image, class: "w-full h-full object-cover"
+          - else
+            .w-full.h-full.bg-cover.bg-center{:style => "background-image: url('#{asset_path 'abaya2.jpg'}'); min-height: 500px;"}
+        .p-4
+          %h3.text-lg.text-brown-black.mb-2= product.name
+          %p.muted.mb-3.text-sm.line-clamp-2= product.description
+          .flex.justify-between.items-center.mb-3
+            %span.text-xl.font-bold.text-amber-600
+              $#{product.price}
+            %span.text-sm.text-gray-500
+              Stock: #{product.stock}
+          .flex.space-x-2
+            = link_to "View Details", product_path(product), class: "flex-1 bg-black text-white px-3 py-3 rounded text-center hover:bg-gray-800 transition-colors hover-anim"
+            - if user_signed_in?
+              = link_to "Add to Cart", cart_items_path(product_id: product.id), method: :post, data: { controller: "cart", action: "click->cart#add", cart_message_value: "Added #{product.name} to cart" }, class: "flex-1 bg-black text-white px-3 py-3 rounded text-center hover:bg-gray-800 transition-colors hover-anim"
+  - if @products.empty?
+    .text-center.py-12
+      %p.text-gray-500.text-lg No products found.
+  / Pagination would go here if implemented

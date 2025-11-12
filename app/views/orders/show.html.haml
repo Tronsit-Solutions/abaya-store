@@ -1,0 +1,50 @@
+.max-w-4xl.mx-auto
+  .mb-8
+    %h1.text-4xl.font-bold.text-brown-black.mb-2 Order Confirmation
+    %p.text-gray-600
+      Order ##{@order.id} - #{@order.created_at.strftime("%B %d, %Y at %I:%M %p")}
+  .bg-white.rounded-lg.shadow-lg.p-8
+    / Order Status
+    .mb-8
+      %h2.text-xl.font-semibold.text-brown-black.mb-4 Order Status
+      .flex.items-center.space-x-4
+        %span.inline-flex.items-center.px-4.py-2.rounded-full.text-sm.font-medium.bg-amber-100.text-amber-800
+          = @order.status.capitalize
+        %span.text-gray-600
+          Total: $#{@order.total}
+    / Order Items
+    .mb-8
+      %h2.text-xl.font-semibold.text-brown-black.mb-4 Order Items
+      .space-y-4
+        - @order.order_items.each do |order_item|
+          .flex.items-center.space-x-4.p-4.bg-gray-50.rounded-lg
+            / Product Image
+            .flex-shrink-0
+              - if order_item.product.image.attached?
+                = image_tag order_item.product.image, class: "w-16 h-16 object-cover rounded-lg"
+              - else
+                .w-16.h-16.bg-gray-200.rounded-lg.flex.items-center.justify-center
+                  %span.text-gray-500.text-xs No Image
+            / Product Details
+            .flex-1.min-w-0
+              %h3.text-lg.font-semibold.text-brown-black= order_item.product.name
+              %p.text-gray-600.text-sm= order_item.product.description
+              .flex.items-center.space-x-4.mt-1
+                %span.text-amber-600.font-semibold
+                  $#{order_item.price}
+                %span.text-gray-500
+                  Qty: #{order_item.quantity}
+            / Total
+            .text-right
+              %span.text-lg.font-bold.text-brown-black
+                $#{order_item.total_price}
+    / Order Summary
+    .border-t.border-gray-200.pt-6
+      .flex.justify-between.items-center.text-xl.font-bold
+        %span.text-brown-black Total
+        %span.text-amber-600
+          $#{@order.total}
+    / Actions
+    .mt-8.flex.space-x-4
+      = link_to "Continue Shopping", products_path, class: "bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+      = link_to "View All Orders", "#", class: "bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors"
