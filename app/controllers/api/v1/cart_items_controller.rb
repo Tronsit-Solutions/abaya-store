@@ -1,4 +1,6 @@
 class Api::V1::CartItemsController < Api::V1::BaseController
+  before_action :require_api_auth!
+
   def index
     @cart = current_user.cart
     @cart_items = @cart.cart_items.includes(:product)
@@ -48,5 +50,4 @@ class Api::V1::CartItemsController < Api::V1::BaseController
     }
   end
 end
-
 

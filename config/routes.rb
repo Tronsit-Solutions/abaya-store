@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: { sessions: 'sessions' }
   devise_for :admin_users, path: 'admin', path_names: { sign_in: 'login', sign_out: 'logout' }, controllers: { sessions: 'admin/sessions' }
 
   root "home#index"
@@ -35,6 +35,7 @@ Rails.application.routes.draw do
 
       # Resources
       resources :products, only: [:index, :show]
+      patch 'products/:id/stock', to: 'products#update_stock'
       resources :cart_items, only: [:create, :destroy, :index]
       resources :orders, only: [:create, :show, :index]
     end

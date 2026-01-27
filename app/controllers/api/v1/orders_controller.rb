@@ -1,4 +1,6 @@
 class Api::V1::OrdersController < Api::V1::BaseController
+  # skip_before_action :authenticate_user!
+  # before_action :require_api_auth!
   def index
     @orders = current_user.orders.includes(:order_items, :products)
     
@@ -8,24 +10,53 @@ class Api::V1::OrdersController < Api::V1::BaseController
   end
 
   def create
-    @cart = current_user.cart
-    
-    if @cart.cart_items.empty?
-      render_error_response('Your cart is empty!')
+    items_attrs = order_params[:order_items_attributes]
+
+    if items_attrs.blank?
+      render_json_response({ error: 'No order items provided' }, :unprocessable_entity)
       return
     end
+    ActiveRecord::Base.transaction do
+      total = 0
 
-    @order = Order.create_from_cart(@cart)
-    
-    if @order.persisted?
-      @cart.clear
-      render_json_response({
-        message: 'Order created successfully',
-        order: order_json(@order)
-      })
-    else
-      render_error_response('Failed to create order. Please try again.')
+      @order = Order.create!(
+        user: current_user,
+        status: 'pending',
+        total: params[:order][:total]
+      )
+
+      items_attrs.each do |item_attrs|
+        product = Product.find(item_attrs[:product_id])
+        quantity = item_attrs[:quantity].to_i
+
+        raise StandardError, "Quantity must be greater than 0" if quantity <= 0
+        raise StandardError, "Insufficient stock for #{product.name}" if quantity > product.stock
+
+        price = product.price
+
+        @order.order_items.create!(
+          product: product,
+          quantity: quantity,
+          price: price
+        )
+
+        # Reduce stock after creating the order item
+        product.reduce_stock(quantity) if product.respond_to?(:reduce_stock)
+
+        total += price * quantity
+      end
+
+      # @order.update!(total: total)
     end
+
+    render_json_response({
+      message: 'Order created successfully',
+      order: order_json(@order)
+    }, :created)
+  rescue ActiveRecord::RecordNotFound => e
+    render_json_response({ error: e.message }, :not_found)
+  rescue StandardError => e
+    render_json_response({ error: e.message }, :unprocessable_entity)
   end
 
   def show
@@ -34,6 +65,12 @@ class Api::V1::OrdersController < Api::V1::BaseController
   end
 
   private
+
+  def order_params
+    params.require(:order).permit(
+      order_items_attributes: [:product_id, :quantity, :price, :product_name, :product_description]
+    )
+  end
 
   def order_json(order)
     {
@@ -60,5 +97,4 @@ class Api::V1::OrdersController < Api::V1::BaseController
     }
   end
 end
-
 

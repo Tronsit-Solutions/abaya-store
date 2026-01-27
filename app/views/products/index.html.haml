@@ -29,7 +29,10 @@
           .flex.space-x-2
             = link_to "View Details", product_path(product), class: "flex-1 bg-black text-white px-3 py-3 rounded text-center hover:bg-gray-800 transition-colors hover-anim"
             - if user_signed_in?
-              = link_to "Add to Cart", cart_items_path(product_id: product.id), method: :post, data: { controller: "cart", action: "click->cart#add", cart_message_value: "Added #{product.name} to cart" }, class: "flex-1 bg-black text-white px-3 py-3 rounded text-center hover:bg-gray-800 transition-colors hover-anim"
+              = form_with url: cart_items_path, method: :post, local: true, class: "flex-1", data: { controller: "cart", action: "submit->cart#add", cart_message_value: "Added #{product.name} to cart" } do |form|
+                = form.hidden_field :product_id, value: product.id
+                = form.hidden_field :quantity, value: 1
+                = form.submit "Add to Cart", class: "w-full bg-black text-white px-3 py-3 rounded text-center hover:bg-gray-800 transition-colors hover-anim"
   - if @products.empty?
     .text-center.py-12
       %p.text-gray-500.text-lg No products found.
