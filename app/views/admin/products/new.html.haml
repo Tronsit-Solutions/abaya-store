@@ -1,9 +1,9 @@
 .flex.flex-col.lg:flex-row.lg:items-center.lg:justify-between.gap-4.mb-10
   %div
-    %small.block.uppercase.tracking-[0.4em].text-xs.font-semibold.text-amber-600.mb-3 New Collection Drop
+    %small.block.uppercase.text-xs.font-semibold.text-amber-600.mb-3{class: "tracking-[0.4em]"} New Collection Drop
     %h1.text-4xl.font-bold.text-brown-black Add New Product
     %p.text-gray-600.mt-2 Craft a compelling listing with imagery and details that shine.
   = link_to "Back to Products", admin_products_path, class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-brown-black hover:bg-gray-50 transition-colors"
 
-.bg-white.rounded-3xl.shadow-2xl.p-8.lg:p-10.border.border-beige/60
+.bg-white.rounded-3xl.shadow-2xl.p-8.lg:p-10.border{class: "border-beige/60"}
   = render "form", product: @product, submit_label: "Create Product", cancel_path: admin_products_path

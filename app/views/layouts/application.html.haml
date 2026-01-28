@@ -33,13 +33,29 @@
           / Center Navigation Menu
           .hidden.md:flex.items-center.space-x-8
             = link_to "Home", root_path, class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            = link_to "Collection", products_path, class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            
+            / Collection Dropdown
+            .relative{ data: { controller: "dropdown" } }
+              %button{ type: "button", data: { action: "click->dropdown#toggle", dropdown_target: "button" }, class: "flex items-center gap-1 text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors", aria: { haspopup: "true", expanded: "false" } }
+                %span Collection
+                %svg.w-4.h-4{ fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" }
+                  %path{ d: "M19 9l-7 7-7-7", "stroke-linecap": "round", "stroke-linejoin": "round", "stroke-width": "2" }
+              .absolute.left-0.mt-2.w-56.bg-white.border.border-gray-100.rounded-xl.shadow-xl.hidden.opacity-0.translate-y-2.transition-all.duration-200.z-50{ data: { dropdown_target: "panel" } }
+                %ul.py-2
+                  %li
+                    = link_to "All Products", products_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                  - if @nav_categories.present?
+                    %li.border-t.border-gray-100.my-1
+                    - @nav_categories.each do |category|
+                      %li
+                        = link_to category, products_path(category: category), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+            
             = link_to "About", "#about", class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             = link_to "Contact", "#contact", class: "text-brown-black hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
           / Right Side - Search and Shop
           .flex.items-center.space-x-4
             / Search Button
-            -# %button.text-brown-black.hover:text-amber-700.p-2.rounded-md.transition-colors{:onclick => "toggleSearch()"}
+            %button.text-brown-black.hover:text-amber-700.p-2.rounded-md.transition-colors{:onclick => "toggleSearch()"}
               %svg.w-5.h-5{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
                 %path{:d => "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2"}
             - if user_signed_in?
@@ -66,11 +82,7 @@
                         %path{ d: "M17 16l4-4m0 0l-4-4m4 4H7", "stroke-linecap": "round", "stroke-linejoin": "round", "stroke-width": "2" }
                         %span Sign Out
               / Cart Button (after dropdown)
-              = link_to cart_path, class: "relative text-brown-black hover:text-amber-700 p-2 rounded-md transition-colors" do
-                %svg.w-5.h-5{ fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" }
-                  %path{ "stroke-linecap" => "round", "stroke-linejoin" => "round", "stroke-width" => "2", "d" => "M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 10H6L5 9z" }
-                - if current_user.cart&.total_items&.> 0
-                  %span.absolute.-top-1.-right-1.bg-amber-600.text-white.text-xs.rounded-full.h-5.w-5.flex.items-center.justify-center= current_user.cart.total_items
+              = render "layouts/cart_button"
             - else
               = link_to "Shop", products_path, class: "bg-brown-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
               .flex.items-center.space-x-2
@@ -80,7 +92,10 @@
         .md:hidden
           .px-2.pt-2.pb-3.space-y-1.sm:px-3
             = link_to "Home", root_path, class: "text-brown-black hover:text-amber-700 block px-3 py-2 rounded-md text-base font-medium"
-            = link_to "Products", products_path, class: "text-brown-black hover:text-amber-700 block px-3 py-2 rounded-md text-base font-medium"
+            = link_to "Collection", products_path, class: "text-brown-black hover:text-amber-700 block px-3 py-2 rounded-md text-base font-medium"
+            - if @nav_categories.present?
+              - @nav_categories.each do |category|
+                = link_to category, products_path(category: category), class: "text-gray-600 hover:text-amber-700 block px-6 py-2 rounded-md text-sm font-medium"
             = link_to "About", "#about", class: "text-brown-black hover:text-amber-700 block px-3 py-2 rounded-md text-base font-medium"
             = link_to "Contact", "#contact", class: "text-brown-black hover:text-amber-700 block px-3 py-2 rounded-md text-base font-medium"
             - if user_signed_in?

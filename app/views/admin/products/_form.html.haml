@@ -31,7 +31,7 @@
     .space-y-2
       = form.label :price, class: "block text-sm font-semibold text-brown-black mb-2 tracking-wide uppercase"
       .relative
-        %span.absolute.left-3.top-1/2.-translate-y-1/2.text-gray-400.font-semibold $
+        %span.absolute.left-3.text-gray-400.font-semibold{class: "top-1/2 -translate-y-1/2"} $
         = form.number_field :price, step: 0.01, class: "w-full pl-8 pr-3 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all", placeholder: "0.00"
       %p.text-xs.text-gray-500 Price shown to shoppers & used to highlight starting price.
 
@@ -44,15 +44,6 @@
       = form.label :image, class: "block text-sm font-semibold text-brown-black mb-3 tracking-wide uppercase"
       - original_src = product.image.attached? ? url_for(product.image) : ""
       .space-y-4{ data: { controller: "image-preview", image_preview_original_src_value: original_src, image_preview_original_filename_value: initial_filename } }
-        .relative.group
-          .aspect-[4/3].w-full.rounded-3xl.border.border-dashed.border-brown-black/20.bg-gradient-to-br.from-amber-50.via-white.to-beige.p-1.transition-all.duration-500.group-hover:border-amber-400.group-hover:shadow-[0_25px_45px_-30px_rgba(214,119,57,0.55)]
-            .relative.w-full.h-full.rounded-[1.3rem].overflow-hidden.bg-white
-              %img.w-full.h-full.object-cover{ src: (product.image.attached? ? original_src : nil), class: product.image.attached? ? "" : "hidden", data: { image_preview_target: "image", original_src: original_src.presence } }
-              .absolute.inset-0.flex.flex-col.items-center.justify-center.gap-3.text-gray-500{ class: product.image.attached? ? "hidden" : "", data: { image_preview_target: "placeholder" } }
-                %div.flex.items-center.justify-center.w-14.h-14.rounded-full.bg-amber-100.text-amber-600
-                  %svg.w-7.h-7{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
-                    %path{:d => "M3 7h4l2-3h6l2 3h4v13H3V7zm9 4a4 4 0 100 8 4 4 0 000-8z", "stroke-width" => "1.5", "stroke-linecap" => "round", "stroke-linejoin" => "round"}
-                %p.text-sm.font-medium Drag & drop or upload a featured image
         .flex.flex-wrap.items-center.gap-4.text-sm
           = form.file_field :image, class: "px-4 py-2.5 rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors file:hidden", data: { action: "change->image-preview#preview", image_preview_target: "input" }
           %span.text-gray-500.flex.items-center.gap-2
@@ -65,13 +56,22 @@
             .flex.items-center.gap-2
               = check_box_tag "product[remove_image]", "1", false, class: "rounded border-gray-300 text-amber-600 focus:ring-amber-500", data: { action: "change->image-preview#toggleRemoval", image_preview_target: "removeToggle" }
               = label_tag "product_remove_image", "Remove current image", class: "text-sm text-gray-600 cursor-pointer"
+        .relative.group
+          .w-full.rounded-3xl.border.border-dashed.bg-gradient-to-br.from-amber-50.via-white.to-beige.p-1.transition-all.duration-500{class: "aspect-[4/3] border-brown-black/20 group-hover:border-amber-400 group-hover:shadow-[0_25px_45px_-30px_rgba(214,119,57,0.55)]"}
+            .relative.w-full.h-full.overflow-hidden.bg-white{class: "rounded-[1.3rem]"}
+              %img.w-full.h-full.object-cover{ src: (product.image.attached? ? original_src : nil), class: product.image.attached? ? "" : "hidden", data: { image_preview_target: "image", original_src: original_src.presence } }
+              .absolute.inset-0.flex.flex-col.items-center.justify-center.gap-3.text-gray-500{ class: product.image.attached? ? "hidden" : "", data: { image_preview_target: "placeholder" } }
+                %div.flex.items-center.justify-center.w-14.h-14.rounded-full.bg-amber-100.text-amber-600
+                  %svg.w-7.h-7{:fill => "none", :stroke => "currentColor", :viewbox => "0 0 24 24"}
+                    %path{:d => "M3 7h4l2-3h6l2 3h4v13H3V7zm9 4a4 4 0 100 8 4 4 0 000-8z", "stroke-width" => "1.5", "stroke-linecap" => "round", "stroke-linejoin" => "round"}
+                %p.text-sm.font-medium Drag & drop or upload a featured image
 
   .flex.flex-wrap.items-center.justify-between.gap-4.mt-10
     - if product.persisted?
-      %span.text-xs.font-medium.uppercase.tracking-[0.3em].text-gray-400
+      %span.text-xs.font-medium.uppercase.text-gray-400{class: "tracking-[0.3em]"}
         Updated #{time_ago_in_words(product.updated_at)} ago
     - else
-      %span.text-xs.font-medium.uppercase.tracking-[0.3em].text-gray-400
+      %span.text-xs.font-medium.uppercase.text-gray-400{class: "tracking-[0.3em]"}
         Draft in progress
     .flex.items-center.gap-3
       = link_to "Cancel", cancel_path, class: "px-5 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"

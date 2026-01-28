@@ -1,0 +1,3 @@
+= turbo_stream.replace "cart-button", partial: "layouts/cart_button"
+= turbo_stream.append "toast-root" do
+  .hidden{ data: { controller: "cart-toast", message: "Added #{@product.name} to cart" } }

@@ -8,9 +8,15 @@ class CartItemsController < ApplicationController
 
     if @product.available? && quantity <= @product.stock
       @cart.add_product(@product, quantity)
-      redirect_to cart_path, notice: 'Product added to cart successfully!'
+      respond_to do |format|
+        format.html { redirect_to cart_path, notice: "Product added to cart successfully!" }
+        format.turbo_stream
+      end
     else
-      redirect_to @product, alert: 'Product is not available or insufficient stock.'
+      respond_to do |format|
+        format.html { redirect_to @product, alert: "Product is not available or insufficient stock." }
+        format.turbo_stream { render turbo_stream: turbo_stream.append("toast-root", html: "<div class='hidden' data-controller='cart-toast' data-message='Insufficient stock' data-type='error'></div>".html_safe) }
+      end
     end
   end
 

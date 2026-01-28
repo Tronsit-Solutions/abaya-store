@@ -4,6 +4,13 @@ class ApplicationController < ActionController::Base
   
   # Configure Devise to use the User model by default
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :set_nav_categories
+  
+  private
+  
+  def set_nav_categories
+    @nav_categories = Product.in_stock.distinct.pluck(:category).compact.sort
+  end
   
   protected
   
